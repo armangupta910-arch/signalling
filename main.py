@@ -1,11 +1,22 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import redis
+import logging
 import json
 from models import SignalMessage
 from websocket_manager import ws_manager
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+
+logger = logging.getLogger("signaling-server")
+
 
 origins = [
     "http://localhost:3000",
@@ -70,6 +81,8 @@ async def root():
 async def websocket_endpoint(websocket: WebSocket, username: str):
     await ws_manager.connect(username, websocket)
     print("Received websocket connection on signalling server for user - " + username)
+    logger.info("WebSocket connected | user=%s", username)
+    logger.info(ws_manager.active_connections)
 
     try:
         while True:
