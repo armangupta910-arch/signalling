@@ -91,6 +91,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
             if signal.event == "join":
                 is_initiator = True if signal.type == "offer" else False
+                logger.info("For user - " + username + " role is initiator - " + str(is_initiator))
                 if not verify_room_and_role(signal.room_code, username, signal.target, is_initiator):
                     await websocket.send_json({"event": "error", "message": "Invalid room or role"})
                     continue
@@ -104,6 +105,8 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
             elif signal.event == "signal":
                 target_ws = ws_manager.active_connections.get(signal.target)
+                logger.info("Signal received for user targeting- " + signal.target)
+                logger.info(ws_manager.active_connections)
                 if not target_ws:
                     await websocket.send_json({"event": "error", "message": "Peer not connected"})
                     continue
