@@ -69,6 +69,7 @@ async def root():
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
     await ws_manager.connect(username, websocket)
+    print("Received websocket connection on signalling server for user - " + username)
 
     try:
         while True:
