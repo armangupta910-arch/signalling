@@ -106,7 +106,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
             elif signal.event == "signal":
                 target_ws = ws_manager.active_connections.get(signal.target)
-                logger.info("Signal received for user targeting- " + signal.target + signal.event + signal.type + signal.data + signal.room_code)
+                logger.info("Signal received for user targeting- " + signal.target + str(signal.event) + str(signal.type) + str(signal.data) + str(signal.room_code))
                 logger.info(ws_manager.active_connections)
                 if not target_ws:
                     await websocket.send_json({"event": "error", "message": "Peer not connected"})
