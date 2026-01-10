@@ -104,7 +104,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                     "role": user_role
                 })
                 if username in ws_manager.active_connections and target in ws_manager.active_connections:
-                    logger.info(f"Both peers connected in room {username+"_" + target}, sending start_connecting to both")
+                    logger.info(f"Both peers connected in room, sending start_connecting to both")
                     await ws_manager.send(username, {
                         "event": "start_connecting",
                         "message": "Both peers ready, you may now exchange signals"
@@ -117,7 +117,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
             elif signal.event == "signal":
                 target_ws = ws_manager.active_connections.get(signal.target)
-                logger.info("Signal received for user targeting- " + signal.target + str(signal.event) + str(signal.type) + str(signal.data) + str(signal.room_code))
+                logger.info("Signal received for user targeting- " + signal.target + str(signal.event) + str(signal.role) + str(signal.data) + str(signal.room_code))
                 logger.info(ws_manager.active_connections)
                 if not target_ws:
                     await websocket.send_json({"event": "error", "message": "Peer not connected"})
@@ -128,7 +128,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                     "event": "signal",
                     "room_code": signal.room_code,
                     "from": username,
-                    "type": signal.type,
+                    "type": signal.role,
                     "data": signal.data
                 })
 
