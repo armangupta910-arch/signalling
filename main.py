@@ -90,19 +90,30 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             signal = SignalMessage(**msg)
 
             if signal.event == "join":
-                is_initiator = True if signal.type == "offer" else False
-                logger.info("For user - " + username + " role is initiator - " + str(is_initiator))
-                print(is_initiator)
+                is_initiator = True if signal.role == "initiator" else False
+                logger.info("For user - " + username + " role is - " + signal.role)
                 if not verify_room_and_role(signal.room_code, username, signal.target, is_initiator):
                     await websocket.send_json({"event": "error", "message": "Invalid room or role"})
                     continue
                 key = f"room:{signal.room_code}"
                 user_role = redis_client.hget(key, username)
+                target = signal.target
                 await websocket.send_json({
                     "event": "verified",
                     "room_code": signal.room_code,
                     "role": user_role
                 })
+                if username in ws_manager.active_connections and target in ws_manager.active_connections:
+                    logger.info(f"Both peers connected in room {username+"_" + target}, sending start_connecting to both")
+                    await ws_manager.send(username, {
+                        "event": "start_connecting",
+                        "message": "Both peers ready, you may now exchange signals"
+                    })
+                    
+                    await ws_manager.send(target, {
+                        "event": "start_connecting",
+                        "message": "Both peers ready, you may now exchange signals"
+                    })
 
             elif signal.event == "signal":
                 target_ws = ws_manager.active_connections.get(signal.target)
